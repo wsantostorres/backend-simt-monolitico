@@ -7,7 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -15,6 +20,10 @@ import java.util.Optional;
 public class VacancyController {
     @Autowired
     VacancyRepository vacancyRepository;
+
+    public VacancyController(VacancyRepository vacancyRepository) {
+        this.vacancyRepository = vacancyRepository;
+    }
 
     @GetMapping
     public ResponseEntity<List<VacancyModel>> getAllVacancies(){
@@ -31,18 +40,73 @@ public class VacancyController {
     }
 
     @PostMapping
-    public ResponseEntity<VacancyModel> saveVacancy(@RequestBody VacancyModel vaga){
-        return ResponseEntity.status(HttpStatus.CREATED).body(vacancyRepository.save(vaga));
+    public ResponseEntity<?> saveVacancy(@RequestBody Map<String, String> requestData) {
+        try {
+            String title = requestData.get("title");
+            String closingDateStr = requestData.get("closingDate");
+            String description = requestData.get("description");
+            int type = Integer.parseInt(requestData.get("type"));
+            int morning = Integer.parseInt(requestData.get("morning"));
+            int afternoon = Integer.parseInt(requestData.get("afternoon"));
+            int night = Integer.parseInt(requestData.get("night"));
+
+            LocalDate parsedClosingDate = LocalDate.parse(closingDateStr, DateTimeFormatter.ISO_DATE);
+            LocalDateTime combinedDateTime = LocalDateTime.of(parsedClosingDate, LocalTime.now());
+
+            VacancyModel vacancyModel = new VacancyModel();
+            vacancyModel.setTitle(title);
+            vacancyModel.setClosingDate(combinedDateTime);
+            vacancyModel.setDescription(description);
+            vacancyModel.setType(type);
+            vacancyModel.setMorning(morning);
+            vacancyModel.setAfternoon(afternoon);
+            vacancyModel.setNight(night);
+            vacancyModel.setCreatedAt(LocalDateTime.now());
+            VacancyModel savedVacancy = vacancyRepository.save(vacancyModel);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedVacancy);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     @PutMapping("{id}/")
-    public ResponseEntity<VacancyModel> updateVacancy(@PathVariable long id, @RequestBody VacancyModel vaga){
-        if(vacancyRepository.findById(id).isPresent()){
-            vaga.setId(id);
-            return ResponseEntity.status(HttpStatus.OK).body(vacancyRepository.save(vaga));
-        }
+    public ResponseEntity<?> updateVacancy(@PathVariable long id, @RequestBody Map<String, String> requestData) {
+        try {
+            Optional<VacancyModel> existingVacancyOptional = vacancyRepository.findById(id);
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            if (existingVacancyOptional.isPresent()) {
+                VacancyModel existingVacancy = existingVacancyOptional.get();
+
+                String title = requestData.get("title");
+                String closingDateStr = requestData.get("closingDate");
+                String description = requestData.get("description");
+                int type = Integer.parseInt(requestData.get("type"));
+                int morning = Integer.parseInt(requestData.get("morning"));
+                int afternoon = Integer.parseInt(requestData.get("afternoon"));
+                int night = Integer.parseInt(requestData.get("night"));
+
+                LocalDate parsedClosingDate = LocalDate.parse(closingDateStr, DateTimeFormatter.ISO_DATE);
+                LocalDateTime combinedDateTime = LocalDateTime.of(parsedClosingDate, LocalTime.of(0, 0));
+
+                existingVacancy.setTitle(title);
+                existingVacancy.setClosingDate(combinedDateTime);
+                existingVacancy.setDescription(description);
+                existingVacancy.setType(type);
+                existingVacancy.setMorning(morning);
+                existingVacancy.setAfternoon(afternoon);
+                existingVacancy.setNight(night);
+                existingVacancy.setUpdatedAt(LocalDateTime.now());
+
+                VacancyModel updatedVacancy = vacancyRepository.save(existingVacancy);
+
+                return ResponseEntity.status(HttpStatus.OK).body(updatedVacancy);
+            }
+            
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @DeleteMapping("{id}/")
