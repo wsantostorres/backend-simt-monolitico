@@ -1,13 +1,14 @@
 package com.api.simt.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter @Setter
 @Entity
@@ -40,4 +41,13 @@ public class StudentModel {
     @NotBlank
     @Column(nullable = false)
     private String schoolClass;
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "VACANCIES_STUDENTS",
+            joinColumns = @JoinColumn(name = "student_fk",
+                    referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "vacancy_fk",
+                    referencedColumnName = "id"))
+    @JsonIgnore
+    private List<VacancyModel> vacancies = new ArrayList<>();
 }

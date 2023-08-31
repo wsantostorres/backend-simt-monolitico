@@ -1,10 +1,13 @@
 package com.api.simt.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter @Setter
 @Entity
@@ -40,5 +43,12 @@ public class VacancyModel {
 
     @Column
     private LocalDateTime updatedAt;
+
+    @ManyToMany(mappedBy = "vacancies", fetch = FetchType.LAZY)
+    private List<CourseModel> courses = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "vacancies", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<StudentModel> students = new ArrayList<>();
 
 }
