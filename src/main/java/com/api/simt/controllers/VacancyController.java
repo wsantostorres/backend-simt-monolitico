@@ -1,6 +1,8 @@
 package com.api.simt.controllers;
 
+import com.api.simt.utils.VacancyMapper;
 import com.api.simt.dtos.VacancyDto;
+import com.api.simt.dtos.VacancyGetAllDto;
 import com.api.simt.models.CourseModel;
 import com.api.simt.models.StudentModel;
 import com.api.simt.models.VacancyModel;
@@ -19,8 +21,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/vacancies")
@@ -35,14 +37,39 @@ public class VacancyController {
     StudentRepository studentRepository;
 
     @GetMapping
-    public ResponseEntity<List<VacancyModel>> getAllVacancies(){
-        return ResponseEntity.status(HttpStatus.OK).body(vacancyRepository.findAll());
+    public ResponseEntity<List<VacancyGetAllDto>> getAllVacancies(){
+        List<VacancyModel> listVacanciesModel = vacancyRepository.findAll();
+        List<VacancyGetAllDto> listVacanciesDto = listVacanciesModel.stream()
+                .map(VacancyMapper::mapToDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.status(HttpStatus.OK).body(listVacanciesDto);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<VacancyModel>> getVacancy(@PathVariable long id){
-        if(vacancyRepository.findById(id).isPresent()) {
-            return ResponseEntity.status(HttpStatus.OK).body(vacancyRepository.findById(id));
+    public ResponseEntity<VacancyDto> getVacancy(@PathVariable long id){
+
+        Optional<VacancyModel> vacancyOptional = vacancyRepository.findById(id);
+
+        if(vacancyOptional.isPresent()) {
+            /* Tive que fazer isso pra formatar a data antes de enviar pro front*/
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            VacancyModel vacancyModel = vacancyOptional.get();
+            String formattedClosingDate = vacancyModel.getClosingDate().format(formatter);
+
+            VacancyDto vacancyDto = new VacancyDto(
+                    vacancyModel.getId(),
+                    vacancyModel.getTitle(),
+                    formattedClosingDate,
+                    vacancyModel.getDescription(),
+                    vacancyModel.getType(),
+                    vacancyModel.getMorning(),
+                    vacancyModel.getAfternoon(),
+                    vacancyModel.getNight(),
+                    vacancyModel.getCourses()
+            );
+
+            return ResponseEntity.status(HttpStatus.OK).body(vacancyDto);
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }

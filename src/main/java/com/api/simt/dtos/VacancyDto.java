@@ -11,3 +11,4 @@ import java.util.List;
 public record VacancyDto (long id, @NotBlank @Size(max = 100) String title, @NotBlank String closingDate, @NotBlank @Size(max = 500) String description, @NotNull int type, @NotNull int morning, @NotNull int afternoon, @NotNull int night, @NotEmpty
                           List<CourseModel> courses){
 }
+
