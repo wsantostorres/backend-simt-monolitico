@@ -34,12 +34,10 @@ public class StudentModel {
     @Column(nullable = false)
     private String course;
 
-    @NotBlank
-    @Column(nullable = false)
+    @Column
     private String schoolShift;
 
-    @NotBlank
-    @Column(nullable = false)
+    @Column
     private String schoolClass;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

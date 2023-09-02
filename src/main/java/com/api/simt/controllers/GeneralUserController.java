@@ -40,11 +40,11 @@ public class GeneralUserController {
                 dataStudent.put("bondType", student.getBondType());
                 dataStudent.put("course", student.getCourse());
                 /* Pegando os ids de todas as vagas que o aluno participou*/
-                List<Long> vacancyIds = student.getVacancies()
+                List<Long> vacanciesIds = student.getVacancies()
                         .stream()
                         .map(VacancyModel::getId)
                         .toList();
-                dataStudent.put("vacancyIds", vacancyIds);
+                dataStudent.put("vacanciesIds", vacanciesIds);
 
                 return ResponseEntity.status(HttpStatus.OK).body(dataStudent);
             }

@@ -1,5 +1,6 @@
 package com.api.simt.controllers;
 
+import com.api.simt.services.ResumeService;
 import com.api.simt.utils.VacancyMapper;
 import com.api.simt.dtos.VacancyDto;
 import com.api.simt.dtos.VacancyGetAllDto;
@@ -11,7 +12,10 @@ import com.api.simt.repositories.StudentRepository;
 import com.api.simt.repositories.VacancyRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,13 +41,49 @@ public class VacancyController {
     @Autowired
     StudentRepository studentRepository;
 
+    @Autowired
+    ResumeService resumeService;
+
     @GetMapping
-    public ResponseEntity<List<VacancyGetAllDto>> getAllVacancies(){
-        List<VacancyModel> listVacanciesModel = vacancyRepository.findAll();
-        List<VacancyGetAllDto> listVacanciesDto = listVacanciesModel.stream()
-                .map(VacancyMapper::mapToDto)
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(listVacanciesDto);
+    public ResponseEntity<List<VacancyGetAllDto>> getAllVacancies(@RequestParam(required = false) String course,
+                                                                  @RequestHeader(name = "bondType") String bondType){
+        Sort sortByDateLastModified = Sort.by(Sort.Direction.DESC, "lastModified");
+        List<VacancyModel> listVacanciesModel = vacancyRepository.findAll(sortByDateLastModified);
+        List<VacancyModel> filteredVacancies = new ArrayList<>();
+
+        try{
+            if(bondType.equals("Aluno")){
+                if(course != null && !course.isEmpty()){
+
+                    CourseModel courseStudent = courseRepository.findByName(course);
+
+                    for(VacancyModel vacancy : listVacanciesModel){
+                        if(vacancy.getCourses().contains(courseStudent)){
+                            filteredVacancies.add(vacancy);
+                        }
+                    }
+
+                    List<VacancyGetAllDto> listVacanciesDto = filteredVacancies.stream()
+                            .map(VacancyMapper::mapToDto)
+                            .collect(Collectors.toList());
+
+                    return ResponseEntity.status(HttpStatus.OK).body(listVacanciesDto);
+                }
+
+                return ResponseEntity.status(HttpStatus.OK).body(Collections.emptyList());
+            }else if(bondType.equals("Servidor")){
+
+                List<VacancyGetAllDto> listVacanciesDto = listVacanciesModel.stream()
+                        .map(VacancyMapper::mapToDto)
+                        .collect(Collectors.toList());
+
+                return ResponseEntity.status(HttpStatus.OK).body(listVacanciesDto);
+            }else{
+                throw new Exception();
+            }
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.OK).body(Collections.emptyList());
+        }
     }
 
     @GetMapping("/{id}")
@@ -51,7 +92,7 @@ public class VacancyController {
         Optional<VacancyModel> vacancyOptional = vacancyRepository.findById(id);
 
         if(vacancyOptional.isPresent()) {
-            /* Tive que fazer isso pra formatar a data antes de enviar pro front*/
+            /* Tive que fazer isso para formatar a data antes de enviar pro front*/
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
             VacancyModel vacancyModel = vacancyOptional.get();
@@ -74,6 +115,92 @@ public class VacancyController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<VacancyGetAllDto>> searchByTitle(
+            @RequestParam(name = "title") String title,
+            @RequestParam(required = false) String course,
+            @RequestHeader(name = "bondType") String bondType
+    ){
+
+        List<VacancyModel> listVacanciesModel = vacancyRepository.searchByTitle(title.trim().toUpperCase());
+        List<VacancyModel> filteredVacancies = new ArrayList<>();
+
+        try{
+            if(bondType.equals("Aluno")){
+                if(course != null && !course.isEmpty()){
+
+                    CourseModel courseStudent = courseRepository.findByName(course);
+
+                    for(VacancyModel vacancy : listVacanciesModel){
+                        if(vacancy.getCourses().contains(courseStudent)){
+                            filteredVacancies.add(vacancy);
+                        }
+                    }
+
+                    List<VacancyGetAllDto> listVacanciesDto = filteredVacancies.stream()
+                            .map(VacancyMapper::mapToDto)
+                            .collect(Collectors.toList());
+
+                    return ResponseEntity.status(HttpStatus.OK).body(listVacanciesDto);
+                }
+
+                return ResponseEntity.status(HttpStatus.OK).body(Collections.emptyList());
+            }else if(bondType.equals("Servidor")){
+
+                List<VacancyGetAllDto> listVacanciesDto = listVacanciesModel.stream()
+                        .map(VacancyMapper::mapToDto)
+                        .collect(Collectors.toList());
+
+                return ResponseEntity.status(HttpStatus.OK).body(listVacanciesDto);
+            }else{
+                throw new Exception();
+            }
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.OK).body(Collections.emptyList());
+        }
+    }
+
+    @GetMapping("/download-resumes/{id}")
+    public ResponseEntity<Object> downloadResumes(@PathVariable long id) {
+        try {
+            Optional<VacancyModel> vacancyOptional = vacancyRepository.findById(id);
+
+            if (vacancyOptional.isPresent()) {
+                VacancyModel vacancy = vacancyOptional.get();
+                List<StudentModel> studentsByVacancy = vacancy.getStudents();
+
+                if (studentsByVacancy.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ainda não há alunos participando desta vaga.");
+                }
+
+                /*
+                    Chamo essa função do resumeService que vai gerar HTML dos currículos
+                    e gerar o arquivo zip com todos os html compactados.
+                 */
+                byte[] zipBytes = resumeService.generateResumesZip(studentsByVacancy);
+
+                if (zipBytes != null) {
+                    String nomeArquivo = vacancy.getTitle();
+
+                    // Configurar a resposta HTTP com o arquivo ZIP contendo os HTMLs
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.parseMediaType("application/zip"));
+                    headers.setContentDispositionFormData("attachment", nomeArquivo + ".zip");
+                    headers.setContentLength(zipBytes.length);
+
+                    return new ResponseEntity<>(zipBytes, headers, HttpStatus.OK);
+                } else {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao gerar o arquivo ZIP.");
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vaga não encontrada.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno no servidor.");
+        }
+    }
+
     @PostMapping
     public ResponseEntity<VacancyModel> createVacancy(@Valid @RequestBody VacancyDto vacancyDto) {
         LocalDate parsedClosingDate = LocalDate.parse(vacancyDto.closingDate(), DateTimeFormatter.ISO_DATE);
@@ -87,7 +214,7 @@ public class VacancyController {
         requestData.setAfternoon(vacancyDto.afternoon());
         requestData.setNight(vacancyDto.night());
         requestData.setClosingDate(combinedDateTime);
-        requestData.setCreatedAt(LocalDateTime.now());
+        requestData.setLastModified(LocalDateTime.now());
 
         /* Aqui está ocorrendo o relacionamento entre
         vagas e cursos na hora do cadastro */
@@ -109,6 +236,9 @@ public class VacancyController {
             }
         }
 
+        if(selectedCourses.isEmpty()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
         requestData.setCourses(selectedCourses);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(vacancyRepository.save(requestData));
@@ -204,7 +334,7 @@ public class VacancyController {
                 existingVacancy.setAfternoon(vacancyDto.afternoon());
                 existingVacancy.setNight(vacancyDto.night());
                 existingVacancy.setClosingDate(combinedDateTime);
-                existingVacancy.setUpdatedAt(LocalDateTime.now());
+                existingVacancy.setLastModified(LocalDateTime.now());
                 existingVacancy.setCourses(selectedCourses);
 
                 VacancyModel updatedVacancy = vacancyRepository.save(existingVacancy);
