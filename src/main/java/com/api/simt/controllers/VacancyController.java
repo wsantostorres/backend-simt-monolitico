@@ -180,12 +180,12 @@ public class VacancyController {
                 byte[] zipBytes = resumeService.generateResumesZip(studentsByVacancy);
 
                 if (zipBytes != null) {
-                    String nomeArquivo = vacancy.getTitle();
+                    String fileName = vacancy.getTitle();
 
                     // Configurar a resposta HTTP com o arquivo ZIP contendo os HTMLs
                     HttpHeaders headers = new HttpHeaders();
                     headers.setContentType(MediaType.parseMediaType("application/zip"));
-                    headers.setContentDispositionFormData("attachment", nomeArquivo + ".zip");
+                    headers.setContentDispositionFormData("attachment", fileName + ".zip");
                     headers.setContentLength(zipBytes.length);
 
                     return new ResponseEntity<>(zipBytes, headers, HttpStatus.OK);
