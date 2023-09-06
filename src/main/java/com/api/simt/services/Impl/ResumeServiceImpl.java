@@ -2,10 +2,11 @@ package com.api.simt.services.Impl;
 
 import com.api.simt.models.StudentModel;
 import com.api.simt.services.ResumeService;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.springframework.stereotype.Service;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,14 +22,21 @@ public class ResumeServiceImpl implements ResumeService{
              ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
 
             for (StudentModel student : students) {
-                String curriculoHtml = generateResumesHtml(student);
+                String resumeHtml = generateResumesHtml(student);
 
-                // Adicionar o arquivo HTML do currículo ao arquivo ZIP
-                ZipEntry entry = new ZipEntry(student.getFullName() + student.getRegistration() + ".html");
+                /* Converter HTML em PDF com OpenHTMLToPDF */
+                Document document = Jsoup.parse(resumeHtml);
+                ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream();
+                PdfRendererBuilder builder = new PdfRendererBuilder();
+                builder.useFastMode();
+                builder.withHtmlContent(document.toString(), null);
+                builder.toStream(pdfOutputStream);
+                builder.run();
+
+                // Adicionar o arquivo PDF do currículo ao arquivo ZIP
+                ZipEntry entry = new ZipEntry(student.getFullName() + student.getRegistration() + ".pdf");
                 zipOutputStream.putNextEntry(entry);
-                ByteArrayInputStream inputStream = new ByteArrayInputStream(curriculoHtml.getBytes(StandardCharsets.UTF_8));
-                IOUtils.copy(inputStream, zipOutputStream);
-                inputStream.close();
+                zipOutputStream.write(pdfOutputStream.toByteArray());
                 zipOutputStream.closeEntry();
             }
 
