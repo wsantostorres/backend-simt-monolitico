@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter @Setter
 @Entity
 @Table(name = "SKILLS")
-public class SkillsModel {
+public class SkillModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

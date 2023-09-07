@@ -1,6 +1,6 @@
 package com.api.simt.controllers;
 
-import com.api.simt.services.ResumeService;
+import com.api.simt.services.GenerateResumeService;
 import com.api.simt.utils.VacancyMapper;
 import com.api.simt.dtos.VacancyDto;
 import com.api.simt.dtos.VacancyGetAllDto;
@@ -42,7 +42,7 @@ public class VacancyController {
     StudentRepository studentRepository;
 
     @Autowired
-    ResumeService resumeService;
+    GenerateResumeService generateResumeService;
 
     @GetMapping
     public ResponseEntity<List<VacancyGetAllDto>> getAllVacancies(@RequestParam(required = false) String course,
@@ -177,7 +177,7 @@ public class VacancyController {
                     Chamo essa função do resumeService que vai gerar HTML dos currículos
                     e gerar o arquivo zip com todos os html compactados.
                  */
-                byte[] zipBytes = resumeService.generateResumesZip(studentsByVacancy);
+                byte[] zipBytes = generateResumeService.generateResumesZip(studentsByVacancy);
 
                 if (zipBytes != null) {
                     String fileName = vacancy.getTitle();

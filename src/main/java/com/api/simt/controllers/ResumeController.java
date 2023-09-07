@@ -3,15 +3,11 @@ package com.api.simt.controllers;
 import com.api.simt.dtos.ResumeDto;
 import com.api.simt.models.ProjectModel;
 import com.api.simt.repositories.ProjectRepository;
+import com.api.simt.services.ResumeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.api.simt.models.ResumeModel;
 import com.api.simt.repositories.ResumeRepository;
 
@@ -23,38 +19,27 @@ import java.util.List;
 @RequestMapping("/resumes")
 public class ResumeController {
     @Autowired
-    ResumeRepository resumeRepository;
-
-    @Autowired
-    ProjectRepository projectRepository;
+    ResumeService resumeService;
 
     @PostMapping
-    public ResponseEntity<String> createResume(@RequestBody ResumeDto resumeDto) {
+    public ResponseEntity<ResumeModel> createResume(@RequestBody ResumeDto resumeDto) {
 
-        try{
-            ResumeModel resumeModel = new ResumeModel();
-            resumeModel.setObjectiveDescription(resumeDto.objectiveDescription());
-
-            for(ProjectModel project : resumeDto.projects()){
-                projectRepository.save(project);
-                resumeModel.getProjects().add(project);
-                project.setResume(resumeModel);
+        try {
+            /*
+            Isso é apenas um exemplo, porque vamos ter que limitar a quantidade
+            de projetos, experiências que o aluno pode enviar. Isso pode ser feito no
+            front-end, porém eu vou deixar aqui porque ainda não sei qual seria o ideal.
+            */
+            if(resumeDto.projects().size() > 1 || resumeDto.experiences().size() > 1){
+                throw new RuntimeException("quantidade não permitida");
             }
-            resumeRepository.save(resumeModel);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Cadastrado com sucesso");
-        }catch (Exception e){
+            ResumeModel savedResume = resumeService.createResume(resumeDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedResume);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Object> updateResume(@PathVariable long id, @RequestBody ResumeModel resume) {
-        if(resumeRepository.findById(id).isPresent()){
-            resume.setId(id);
-            return ResponseEntity.status(HttpStatus.OK).body(resumeRepository.save(resume));
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
 }

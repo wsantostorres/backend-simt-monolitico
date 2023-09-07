@@ -20,4 +20,8 @@ public class ResumeModel {
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
     private List<ProjectModel> projects = new ArrayList<>();
+
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    private List<ExperienceModel> experiences = new ArrayList<>();
+
 }

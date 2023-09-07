@@ -1,11 +1,11 @@
 package com.api.simt.services;
 
-import com.api.simt.models.StudentModel;
+import com.api.simt.dtos.ResumeDto;
+import com.api.simt.models.ResumeModel;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public interface ResumeService {
-    public byte[] generateResumesZip(List<StudentModel> students);
+
+    public ResumeModel createResume(ResumeDto resumeDto);
 }
