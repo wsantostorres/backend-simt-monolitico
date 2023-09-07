@@ -1,10 +1,6 @@
 package com.api.simt.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,8 +11,16 @@ public class ProjectModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column
     private String type;
+    @Column
     private String titleProject;
+    @Column
     private int initialYear;
+    @Column
     private int closingYear;
+
+    @ManyToOne
+    @JoinColumn(name="resume_id")
+    private ResumeModel resume;
 }
