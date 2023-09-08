@@ -1,10 +1,7 @@
 package com.api.simt.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +12,14 @@ public class AddressModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column
     private String city;
+    @Column
     private String street;
+    @Column
     private int number;
+
+    @OneToOne(mappedBy = "address")
+    @JsonIgnore
+    private ResumeModel resume;
 }

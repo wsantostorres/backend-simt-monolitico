@@ -13,9 +13,11 @@ public class ExperienceModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Column
+    private String company;
+    @Column
     private String functionName;
     @Column
-    private String Location;
+    private String location;
     @Column
     private int initialYear;
     @Column

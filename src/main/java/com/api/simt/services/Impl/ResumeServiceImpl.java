@@ -1,9 +1,7 @@
 package com.api.simt.services.Impl;
 
 import com.api.simt.dtos.ResumeDto;
-import com.api.simt.models.ExperienceModel;
-import com.api.simt.models.ProjectModel;
-import com.api.simt.models.ResumeModel;
+import com.api.simt.models.*;
 import com.api.simt.repositories.ResumeRepository;
 import com.api.simt.services.ResumeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +30,32 @@ public class ResumeServiceImpl implements ResumeService {
                 experience.setResume(resumeModel);
             }
 
+            /* Adicionando Formações Academicas */
+            for (AcademicFormationModel academic : resumeDto.academics()){
+                academic.setResume(resumeModel);
+            }
+
+            /* Adicionando habilidades */
+            for (SkillModel skill : resumeDto.skills()){
+                skill.setResume(resumeModel);
+            }
+
+            /* Adicionando endereço */
+            AddressModel address = resumeDto.address();
+            address.setResume(resumeModel);
+
+            /*Adicionando contato*/
+            ContactModel contac = resumeDto.contacts();
+            contac.setResume(resumeModel);
+
             resumeModel.setProjects(resumeDto.projects());
             resumeModel.setExperiences(resumeDto.experiences());
+            resumeModel.setAcademics(resumeDto.academics());
+            resumeModel.setSkills(resumeDto.skills());
+            resumeModel.setAddress(resumeDto.address());
+            resumeModel.setContacts(resumeDto.contacts());
+
+
 
             ResumeModel savedResume;
             return savedResume = resumeRepository.save(resumeModel);
