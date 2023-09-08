@@ -19,7 +19,7 @@ public class ContactModel {
     @Column
     private String linkedin;
 
-    @OneToOne(mappedBy = "contacts")
+    @OneToOne(mappedBy = "contact")
     @JsonIgnore
     private ResumeModel resume;
 }

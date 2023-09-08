@@ -11,6 +11,8 @@ import com.api.simt.models.ResumeModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/resumes")
 public class ResumeController {
@@ -21,6 +23,21 @@ public class ResumeController {
 //    o próprio "println" já estava mostrando a msn de erro
     private static final Logger logger = LoggerFactory.getLogger(ResumeController.class);
 
+    @GetMapping("{id}")
+    public ResponseEntity<ResumeModel> getResume(@PathVariable long id){
+        try{
+            ResumeModel resumeFound = resumeService.getResume(id);
+
+            if(resumeFound == null){
+                throw new Exception("Currículo não encontrado");
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(resumeFound);
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
     @PostMapping
     public ResponseEntity<ResumeModel> createResume(@RequestBody ResumeDto resumeDto) {
 
@@ -30,9 +47,9 @@ public class ResumeController {
             de projetos, experiências que o aluno pode enviar. Isso pode ser feito no
             front-end, porém eu vou deixar aqui porque ainda não sei qual seria o ideal.
             */
-            if(resumeDto.projects().size() > 1 || resumeDto.experiences().size() > 1 || resumeDto.academics().size() > 1
-            || resumeDto.skills().size() > 1){
-                throw new RuntimeException("quantidade não permitida");
+            if(resumeDto.projects().size() > 2 || resumeDto.experiences().size() > 2 || resumeDto.academics().size() > 2
+            || resumeDto.skills().size() > 2){
+                throw new Exception("quantidade não permitida");
             }
             ResumeModel savedResume = resumeService.createResume(resumeDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedResume);
@@ -42,6 +59,28 @@ public class ResumeController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<ResumeModel> updateResume(@PathVariable long id, @RequestBody ResumeDto resumeDto){
+        try{
+
+            if(resumeDto.projects().size() > 2 || resumeDto.experiences().size() > 2 || resumeDto.academics().size() > 2
+                    || resumeDto.skills().size() > 2){
+                throw new Exception("quantidade não permitida");
+            }
+
+            ResumeModel resumeFound = resumeService.updateResume(id, resumeDto);
+
+            if(resumeFound == null){
+                throw new Exception("Currículo não encontrado");
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(resumeFound);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
 }

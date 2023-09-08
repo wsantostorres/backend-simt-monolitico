@@ -10,5 +10,5 @@ public record ResumeDto (String objectiveDescription,
                          List<AcademicFormationModel> academics,
                          List<SkillModel> skills,
                          AddressModel address,
-                         ContactModel contacts){
+                         ContactModel contact){
 }

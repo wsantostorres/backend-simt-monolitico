@@ -34,5 +34,5 @@ public class ResumeModel {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "contact_id", referencedColumnName = "id")
-    private ContactModel contacts;
+    private ContactModel contact;
 }
