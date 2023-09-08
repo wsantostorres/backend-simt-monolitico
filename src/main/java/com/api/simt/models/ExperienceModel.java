@@ -17,8 +17,6 @@ public class ExperienceModel {
     @Column
     private String functionName;
     @Column
-    private String location;
-    @Column
     private int initialYear;
     @Column
     private int closingYear;

@@ -15,7 +15,7 @@ public class AcademicFormationModel {
     @Column
     private String schooling;
     @Column
-    private String institution;
+    private String foundation;
     @Column
     private int initialYear;
     @Column

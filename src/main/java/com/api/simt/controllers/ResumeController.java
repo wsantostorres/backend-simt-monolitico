@@ -17,6 +17,8 @@ public class ResumeController {
     @Autowired
     ResumeService resumeService;
 
+//    Esse Logger não faz o menor sentido,
+//    o próprio "println" já estava mostrando a msn de erro
     private static final Logger logger = LoggerFactory.getLogger(ResumeController.class);
 
     @PostMapping

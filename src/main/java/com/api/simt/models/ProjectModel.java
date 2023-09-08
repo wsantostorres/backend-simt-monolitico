@@ -13,6 +13,8 @@ public class ProjectModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Column
+    private String foundation;
+    @Column
     private String titleProject;
     @Column
     private int initialYear;

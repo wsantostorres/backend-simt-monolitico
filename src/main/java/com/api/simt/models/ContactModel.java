@@ -13,7 +13,7 @@ public class ContactModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Column
-    private int phone;
+    private String phone;
     @Column
     private String email;
     @Column
