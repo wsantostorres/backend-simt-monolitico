@@ -118,7 +118,7 @@ public class ResumeServiceImpl implements ResumeService {
                     if (existingProject.isPresent()) {
                         /* Se por acaso um projeto existir e tentar atualizar com campos vazios
                           vou excluir o projeto */
-                        if(project.getTitleProject().isEmpty()){
+                        if(project.getTitleProject().isEmpty() && project.getFoundation().isEmpty()){
                             projectRepository.deleteById(project.getId());
                         }else{
                             existingProject.get().setFoundation(project.getFoundation());
@@ -126,13 +126,12 @@ public class ResumeServiceImpl implements ResumeService {
                             existingProject.get().setInitialYear(project.getInitialYear());
                             existingProject.get().setClosingYear(project.getClosingYear());
                         }
-                    }else{
+                    }
+                }else{
+                    if(!project.getTitleProject().isEmpty() && !project.getFoundation().isEmpty()){
                         project.setResume(existingResumeModel);
                         existingResumeModel.getProjects().add(project);
                     }
-                }else{
-                    project.setResume(existingResumeModel);
-                    existingResumeModel.getProjects().add(project);
                 }
             }
 
@@ -141,8 +140,7 @@ public class ResumeServiceImpl implements ResumeService {
                 if (experience.getId() != null) {
                     Optional<ExperienceModel> existingExperience = experienceRepository.findById(experience.getId());
                     if (existingExperience.isPresent()) {
-                        if((experience.getCompany().isEmpty() && experience.getFunctionName().isEmpty())
-                        || (!experience.getCompany().isEmpty() && experience.getFunctionName().isEmpty())){
+                        if(experience.getCompany().isEmpty() && experience.getFunctionName().isEmpty()){
                             experienceRepository.deleteById(experience.getId());
                         }else{
                             existingExperience.get().setCompany(experience.getCompany());
@@ -150,13 +148,12 @@ public class ResumeServiceImpl implements ResumeService {
                             existingExperience.get().setInitialYear(experience.getInitialYear());
                             existingExperience.get().setClosingYear(experience.getClosingYear());
                         }
-                    }else{
+                    }
+                }else{
+                    if(!experience.getCompany().isEmpty() && !experience.getFunctionName().isEmpty()){
                         experience.setResume(existingResumeModel);
                         existingResumeModel.getExperiences().add(experience);
                     }
-                }else{
-                    experience.setResume(existingResumeModel);
-                    existingResumeModel.getExperiences().add(experience);
                 }
             }
 
@@ -174,17 +171,16 @@ public class ResumeServiceImpl implements ResumeService {
                             existingAcademicFormation.get().setInitialYear(academic.getInitialYear());
                             existingAcademicFormation.get().setClosingYear(academic.getClosingYear());
                         }
-                    }else{
+                    }
+                }else{
+                    if(!academic.getFoundation().isEmpty() || !academic.getSchooling().isEmpty()){
                         academic.setResume(existingResumeModel);
                         existingResumeModel.getAcademics().add(academic);
                     }
-                }else{
-                    academic.setResume(existingResumeModel);
-                    existingResumeModel.getAcademics().add(academic);
                 }
             }
 
-            /* Atualizando habilidades */
+            /* Atualizando Habilidades */
             for (SkillModel skill : resumeDto.skills()){
                 if(skill.getId() != null){
                     Optional<SkillModel> existingSkill
@@ -195,13 +191,12 @@ public class ResumeServiceImpl implements ResumeService {
                         }else{
                             existingSkill.get().setNameSkill(skill.getNameSkill());
                         }
-                    }else{
+                    }
+                }else{
+                    if(!skill.getNameSkill().isEmpty()) {
                         skill.setResume(existingResumeModel);
                         existingResumeModel.getSkills().add(skill);
                     }
-                }else{
-                    skill.setResume(existingResumeModel);
-                    existingResumeModel.getSkills().add(skill);
                 }
             }
 

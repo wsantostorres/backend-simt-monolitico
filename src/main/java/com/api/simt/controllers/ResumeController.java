@@ -44,8 +44,8 @@ public class ResumeController {
             de projetos, experiências que o aluno pode enviar. Isso pode ser feito no
             front-end, porém eu vou deixar aqui porque ainda não sei qual seria o ideal.
             */
-            if(resumeDto.projects().size() > 2 || resumeDto.experiences().size() > 2 || resumeDto.academics().size() > 2
-            || resumeDto.skills().size() > 2){
+            if(resumeDto.projects().size() > 5 || resumeDto.experiences().size() > 5 || resumeDto.academics().size() > 5
+            || resumeDto.skills().size() > 5){
                 throw new Exception("quantidade nao permitida");
             }
             ResumeModel savedResume = resumeService.createResume(studentId, resumeDto);
@@ -66,8 +66,8 @@ public class ResumeController {
     public ResponseEntity<ResumeModel> updateResume(@PathVariable long studentId, @PathVariable long resumeId , @RequestBody ResumeDto resumeDto){
         try{
 
-            if(resumeDto.projects().size() > 2 || resumeDto.experiences().size() > 2 || resumeDto.academics().size() > 2
-                    || resumeDto.skills().size() > 2){
+            if(resumeDto.projects().size() > 5 || resumeDto.experiences().size() > 5 || resumeDto.academics().size() > 5
+                    || resumeDto.skills().size() > 5){
                 throw new Exception("quantidade nao permitida");
             }
 

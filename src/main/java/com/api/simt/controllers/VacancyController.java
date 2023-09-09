@@ -271,6 +271,10 @@ public class VacancyController {
                     return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
                 }
 
+                if(student.getResume() == null){
+                    return ResponseEntity.status(HttpStatus.LOCKED).body(null);
+                }
+
                 student.getVacancies().add(vacancy);
                 vacancy.getStudents().add(student);
 
