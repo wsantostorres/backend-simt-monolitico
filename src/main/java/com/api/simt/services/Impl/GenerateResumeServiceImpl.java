@@ -1,6 +1,6 @@
 package com.api.simt.services.Impl;
 
-import com.api.simt.models.StudentModel;
+import com.api.simt.models.*;
 import com.api.simt.services.GenerateResumeService;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.jsoup.Jsoup;
@@ -59,8 +59,59 @@ public class GenerateResumeServiceImpl implements GenerateResumeService {
             if (inputStream != null) {
                 String htmlTemplate = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
+                /* ENDEREÇO E CONTATO */
+                StringBuilder addressAndContactHtml = new StringBuilder();
+                AddressModel addressStudent = student.getResume().getAddress();
+                String address = "<p> Endereço: " + addressStudent.getStreet() + ", "
+                        + addressStudent.getNumber() + " - " + addressStudent.getCity() + "</p>";
+                String email = "<p> Email: " + student.getResume().getContact().getEmail() + "</p>";
+                String phone = "<p> Nº Telefone: " + student.getResume().getContact().getPhone() + "</p>";
+                String linkedin = "<p> Linkedin: " + student.getResume().getContact().getLinkedin() + "</p>";
+                addressAndContactHtml.append(email);
+                addressAndContactHtml.append(phone);
+                addressAndContactHtml.append(linkedin);
+                addressAndContactHtml.append(address);
+
+                /* HABILIDADES */
+                StringBuilder skillsHtml = new StringBuilder();
+                for(SkillModel skill : student.getResume().getSkills()){
+                    String valueSkill = "<li>" + skill.getNameSkill() + "</li>";
+                    skillsHtml.append(valueSkill);
+                }
+
+                /* FORMAÇÕES ACADÊMICAS */
+                StringBuilder formationsHtml = new StringBuilder();
+                for(AcademicFormationModel academic : student.getResume().getAcademics()){
+                    String valuesAcademic = "<li>" + academic.getSchooling() + " - " + academic.getFoundation() + " - " +
+                            academic.getInitialYear() + " - " + academic.getClosingYear() + "</li>";
+                    formationsHtml.append(valuesAcademic);
+                }
+
+                /* PROJETOS */
+                StringBuilder projectsHtml = new StringBuilder();
+                for(ProjectModel project : student.getResume().getProjects()){
+                    String valuesProject = "<li>" + project.getTitleProject() + " - " + project.getFoundation() + " - " +
+                            project.getInitialYear() + " - " + project.getClosingYear() + "</li>";
+                    projectsHtml.append(valuesProject);
+                }
+
+                /* EXPERIÊNCIAS */
+                StringBuilder experiencesHtml = new StringBuilder();
+                for(ExperienceModel experience : student.getResume().getExperiences()){
+                    String valuesExperience = "<li>" + experience.getFunctionName() + " - " + experience.getCompany() + " - " +
+                            experience.getInitialYear() + " - " + experience.getClosingYear() + "</li>";
+                    experiencesHtml.append(valuesExperience);
+                }
+
                 /* Substituir informações do currículo do Aluno aqui */
-                htmlTemplate = htmlTemplate.replace("{fullName}", student.getFullName());
+                htmlTemplate = htmlTemplate.replace("{FULLNAME}", student.getFullName());
+                htmlTemplate = htmlTemplate.replace("{CONTATOENDERECO}", addressAndContactHtml);
+                htmlTemplate = htmlTemplate.replace("{OBJECTIVEDESCRIPTION}",
+                        student.getResume().getObjectiveDescription());
+                htmlTemplate = htmlTemplate.replace("{HABILIDADES}", skillsHtml);
+                htmlTemplate = htmlTemplate.replace("{FORMACAO}", formationsHtml);
+                htmlTemplate = htmlTemplate.replace("{PROJETOS}", projectsHtml);
+                htmlTemplate = htmlTemplate.replace("{EXPERIENCIAS}", experiencesHtml);
 
                 return htmlTemplate;
             } else {
