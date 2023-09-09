@@ -7,6 +7,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface ResumeService {
     public ResumeModel getResume(long id);
-    public ResumeModel createResume(ResumeDto resumeDto);
-    public ResumeModel updateResume(long id, ResumeDto resumeDto);
+    public ResumeModel createResume(long studentId, ResumeDto resumeDto);
+    public ResumeModel updateResume(long studentId, long id, ResumeDto resumeDto);
 }

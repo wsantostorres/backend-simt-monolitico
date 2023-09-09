@@ -14,6 +14,9 @@ import java.util.Optional;
 public class ResumeServiceImpl implements ResumeService {
 
     @Autowired
+    StudentRepository studentRepository;
+
+    @Autowired
     ResumeRepository resumeRepository;
 
     @Autowired
@@ -28,13 +31,6 @@ public class ResumeServiceImpl implements ResumeService {
     @Autowired
     SkillRepository skillRepository;
 
-    @Autowired
-    AddressRepository addressRepository;
-
-    @Autowired
-    ContactRepository contactRepository;
-
-
     @Override
     @Transactional
     public ResumeModel getResume(long id) {
@@ -44,48 +40,59 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     @Transactional
-    public ResumeModel createResume(ResumeDto resumeDto) {
+    public ResumeModel createResume(long studentId, ResumeDto resumeDto) {
         try {
-            ResumeModel resumeModel = new ResumeModel();
-            resumeModel.setObjectiveDescription(resumeDto.objectiveDescription());
+            Optional<StudentModel> studentModelOptional = studentRepository.findById(studentId);
 
-            /* Adicionando Projetos */
-            for (ProjectModel project : resumeDto.projects()) {
-                project.setResume(resumeModel);
+            /* Só posso cadastrar se o aluno não tiver currículo cadastrado */
+            if(studentModelOptional.isPresent() && studentModelOptional.get().getResume() == null){
+                ResumeModel resumeModel = new ResumeModel();
+                resumeModel.setObjectiveDescription(resumeDto.objectiveDescription());
+
+                /* Adicionando Projetos */
+                for (ProjectModel project : resumeDto.projects()) {
+                    project.setResume(resumeModel);
+                }
+
+                /* Adicionando Experiencias */
+                for (ExperienceModel experience : resumeDto.experiences()) {
+                    experience.setResume(resumeModel);
+                }
+
+                /* Adicionando Formações Acadêmicas */
+                for (AcademicFormationModel academic : resumeDto.academics()){
+                    academic.setResume(resumeModel);
+                }
+
+                /* Adicionando habilidades */
+                for (SkillModel skill : resumeDto.skills()){
+                    skill.setResume(resumeModel);
+                }
+
+                /* Adicionando endereço */
+                AddressModel address = resumeDto.address();
+                address.setResume(resumeModel);
+
+                /*Adicionando contato*/
+                ContactModel contact = resumeDto.contact();
+                contact.setResume(resumeModel);
+
+                /* Relacionando Aluno e Currículo */
+                studentModelOptional.get().setResume(resumeModel);
+
+                resumeModel.setProjects(resumeDto.projects());
+                resumeModel.setExperiences(resumeDto.experiences());
+                resumeModel.setAcademics(resumeDto.academics());
+                resumeModel.setSkills(resumeDto.skills());
+                resumeModel.setAddress(resumeDto.address());
+                resumeModel.setContact(resumeDto.contact());
+
+                ResumeModel savedResume;
+                return savedResume = resumeRepository.save(resumeModel);
             }
 
-            /* Adicionando Experiencias */
-            for (ExperienceModel experience : resumeDto.experiences()) {
-                experience.setResume(resumeModel);
-            }
+            return null;
 
-            /* Adicionando Formações Academicas */
-            for (AcademicFormationModel academic : resumeDto.academics()){
-                academic.setResume(resumeModel);
-            }
-
-            /* Adicionando habilidades */
-            for (SkillModel skill : resumeDto.skills()){
-                skill.setResume(resumeModel);
-            }
-
-            /* Adicionando endereço */
-            AddressModel address = resumeDto.address();
-            address.setResume(resumeModel);
-
-            /*Adicionando contato*/
-            ContactModel contact = resumeDto.contact();
-            contact.setResume(resumeModel);
-
-            resumeModel.setProjects(resumeDto.projects());
-            resumeModel.setExperiences(resumeDto.experiences());
-            resumeModel.setAcademics(resumeDto.academics());
-            resumeModel.setSkills(resumeDto.skills());
-            resumeModel.setAddress(resumeDto.address());
-            resumeModel.setContact(resumeDto.contact());
-
-            ResumeModel savedResume;
-            return savedResume = resumeRepository.save(resumeModel);
         } catch (Exception e) {
             throw new RuntimeException("Ocorreu um erro ao salvar o currículo.", e);
         }
@@ -93,10 +100,14 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     @Transactional
-    public ResumeModel updateResume(long id, ResumeDto resumeDto) {
+    public ResumeModel updateResume(long studentId, long id, ResumeDto resumeDto) {
         Optional<ResumeModel> resumeModelOptional = resumeRepository.findById(id);
+        Optional<StudentModel> studentModelOptional = studentRepository.findById(studentId);
 
-        if(resumeModelOptional.isPresent()){
+        if(resumeModelOptional.isPresent() && studentModelOptional.isPresent()
+        && resumeModelOptional.get().getStudent().getId() ==
+                studentModelOptional.get().getId()){
+
             ResumeModel existingResumeModel = resumeModelOptional.get();
             existingResumeModel.setObjectiveDescription(resumeDto.objectiveDescription());
 

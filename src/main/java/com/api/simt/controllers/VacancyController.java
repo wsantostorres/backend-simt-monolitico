@@ -245,7 +245,7 @@ public class VacancyController {
     }
 
     @PostMapping("/send-resume/{studentId}/{vacancyId}")
-    public ResponseEntity<Object> sendResumeForVacancy(@PathVariable Long studentId, @PathVariable Long vacancyId) {
+    public ResponseEntity<Object> sendResumeForVacancy(@PathVariable long studentId, @PathVariable long vacancyId) {
         try{
             Optional<StudentModel> studentOptional = studentRepository.findById(studentId);
             Optional<VacancyModel> vacancyOptional = vacancyRepository.findById(vacancyId);

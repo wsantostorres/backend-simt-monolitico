@@ -48,4 +48,9 @@ public class StudentModel {
                     referencedColumnName = "id"))
     @JsonIgnore
     private List<VacancyModel> vacancies = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "resume_id", referencedColumnName = "id")
+    private ResumeModel resume;
+
 }

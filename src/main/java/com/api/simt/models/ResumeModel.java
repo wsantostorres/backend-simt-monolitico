@@ -1,5 +1,6 @@
 package com.api.simt.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,4 +36,8 @@ public class ResumeModel {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "contact_id", referencedColumnName = "id")
     private ContactModel contact;
+
+    @OneToOne(mappedBy = "resume")
+    @JsonIgnore
+    private StudentModel student;
 }

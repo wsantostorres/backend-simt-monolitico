@@ -45,6 +45,12 @@ public class GeneralUserController {
                         .map(VacancyModel::getId)
                         .toList();
                 dataStudent.put("vacanciesIds", vacanciesIds);
+                if(student.getResume() != null){
+                    long resumeId = student.getResume().getId();
+                    dataStudent.put("resumeId", resumeId);
+                }else{
+                    dataStudent.put("resumeId", null);
+                }
 
                 return ResponseEntity.status(HttpStatus.OK).body(dataStudent);
             }
