@@ -8,6 +8,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -49,24 +51,41 @@ public class ResumeServiceImpl implements ResumeService {
                 ResumeModel resumeModel = new ResumeModel();
                 resumeModel.setObjectiveDescription(resumeDto.objectiveDescription());
 
+                List<ProjectModel> projects = new ArrayList<>();
+                List<ExperienceModel> experiences = new ArrayList<>();
+                List<AcademicFormationModel> academics = new ArrayList<>();
+                List<SkillModel> skills = new ArrayList<>();
+
                 /* Adicionando Projetos */
                 for (ProjectModel project : resumeDto.projects()) {
-                    project.setResume(resumeModel);
+                    if(!project.getTitleProject().isEmpty() && !project.getFoundation().isEmpty()){
+                        project.setResume(resumeModel);
+                        projects.add(project);
+                    }
                 }
 
                 /* Adicionando Experiencias */
                 for (ExperienceModel experience : resumeDto.experiences()) {
-                    experience.setResume(resumeModel);
+                    if(!experience.getCompany().isEmpty() && !experience.getFunctionName().isEmpty()){
+                        experience.setResume(resumeModel);
+                        experiences.add(experience);
+                    }
                 }
 
                 /* Adicionando Formações Acadêmicas */
                 for (AcademicFormationModel academic : resumeDto.academics()){
-                    academic.setResume(resumeModel);
+                    if(!academic.getFoundation().isEmpty() || !academic.getSchooling().isEmpty()){
+                        academic.setResume(resumeModel);
+                        academics.add(academic);
+                    }
                 }
 
                 /* Adicionando habilidades */
                 for (SkillModel skill : resumeDto.skills()){
-                    skill.setResume(resumeModel);
+                    if(!skill.getNameSkill().isEmpty()) {
+                        skill.setResume(resumeModel);
+                        skills.add(skill);
+                    }
                 }
 
                 /* Adicionando endereço */
@@ -80,10 +99,10 @@ public class ResumeServiceImpl implements ResumeService {
                 /* Relacionando Aluno e Currículo */
                 studentModelOptional.get().setResume(resumeModel);
 
-                resumeModel.setProjects(resumeDto.projects());
-                resumeModel.setExperiences(resumeDto.experiences());
-                resumeModel.setAcademics(resumeDto.academics());
-                resumeModel.setSkills(resumeDto.skills());
+                resumeModel.setProjects(projects);
+                resumeModel.setExperiences(experiences);
+                resumeModel.setAcademics(academics);
+                resumeModel.setSkills(skills);
                 resumeModel.setAddress(resumeDto.address());
                 resumeModel.setContact(resumeDto.contact());
 
