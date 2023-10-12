@@ -82,24 +82,24 @@ public class GenerateResumeServiceImpl implements GenerateResumeService {
                 /* FORMAÇÕES ACADÊMICAS */
                 StringBuilder formationsHtml = new StringBuilder();
                 for(AcademicFormationModel academic : student.getResume().getAcademics()){
-                    String valuesAcademic = "<li>" + academic.getSchooling() + " - " + academic.getFoundation() + " - " +
-                            academic.getInitialYear() + " - " + academic.getClosingYear() + "</li>";
+                    String valuesAcademic = "<li>" + "<p>" + academic.getInitialYear() + "-" + academic.getClosingYear() + " | " + academic.getFoundation() + "</p>" +
+                             "<span>" + academic.getSchooling() + "</span>" + "</li>";
                     formationsHtml.append(valuesAcademic);
                 }
 
                 /* PROJETOS */
                 StringBuilder projectsHtml = new StringBuilder();
                 for(ProjectModel project : student.getResume().getProjects()){
-                    String valuesProject = "<li>" + project.getTitleProject() + " - " + project.getFoundation() + " - " +
-                            project.getInitialYear() + " - " + project.getClosingYear() + "</li>";
+                    String valuesProject = "<li>" + "<p>" + project.getInitialYear() + "-" + project.getClosingYear() + " | " + project.getFoundation() + "</p>" +
+                            "<span>" + project.getTitleProject() + "</span>" + "</li>";
                     projectsHtml.append(valuesProject);
                 }
 
                 /* EXPERIÊNCIAS */
                 StringBuilder experiencesHtml = new StringBuilder();
                 for(ExperienceModel experience : student.getResume().getExperiences()){
-                    String valuesExperience = "<li>" + experience.getFunctionName() + " - " + experience.getCompany() + " - " +
-                            experience.getInitialYear() + " - " + experience.getClosingYear() + "</li>";
+                    String valuesExperience = "<li>" + "<p>" + experience.getInitialYear() + "-" + experience.getClosingYear() + " | " + experience.getCompany() + "</p>" +
+                            "<span>" + experience.getFunctionName() + "</span>" + "</li>";
                     experiencesHtml.append(valuesExperience);
                 }
 
